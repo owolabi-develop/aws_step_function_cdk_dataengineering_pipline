@@ -5,7 +5,7 @@ This project solution use an aws step functions state machine to orchestrate a s
 
 
 ## Project Architecture
-
+![alt text](diagramphoto/arch.png)
 
 ```
 $ python -m venv .venv
