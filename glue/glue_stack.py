@@ -127,7 +127,7 @@ class GlueCrawlerStack(Stack):
                      recrawl_behavior='CRAWL_EVENT_MODE'))
 
         glue_job = _glue.CfnJob(self, 'glue_job',
-                                name='glue_job',
+                                name='customer_data_job',
                                 command=_glue.CfnJob.JobCommandProperty(
                                     name='pythonshell',
                                     python_version='3.9',

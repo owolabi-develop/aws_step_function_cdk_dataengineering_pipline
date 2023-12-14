@@ -14,9 +14,9 @@ job.init(args["JOB_NAME"], args)
 
 
 PropertyDataCatalog = glueContext.create_dynamic_frame.from_catalog(
-    database="property-database",
-    table_name="property_raw_zone",
-    transformation_ctx="AWSGlueDataCatalog_node1711980189310",
+    database="customer-database",
+    table_name="customer_raw_zone",
+    transformation_ctx="PropertyDataCatalog",
 )
 
 # Change Schema
