@@ -1,7 +1,8 @@
 
 # End to End Event Driven Etl Automation pipline cdk!
 
-This project solution use an aws step functions state machine to orchestrate a serverless data pipline that process raw data as it arrives in s3 raw-zone bucket. Then notify a lambda function on objectcreated event and then the lambda function trigger the step function state mechaine workflow to run glue crawler job and catalog the data. then run another glue etl job on the data and save to consumption-zone bucket as parquet format. then use athena to query the catalog table and save the result to result folder in the consumption but after all process complete. it then use sns to send email to admin on job success or failure
+This project solution use an aws step functions state machine to orchestrate a serverless data pipline that process raw data as it arrives in s3 raw-zone bucket. Then notify a lambda function on objectcreated event and then the lambda function trigger the step function state mechaine workflow to run glue crawler job and catalog the data. then run another glue etl job on the data and save to consumption-zone bucket as parquet format. then use athena to query the catalog table and save the result to result folder in the consumption but after all process complete. it then use sns to send email to admin on job success or failure.
+This solution is develop with AWS Toolkit for Visual Studio Code and and aws cdk. sample state mechine local development code can be found in th pipline_aws_step_function_state_language.asl.json
 
 
 ## Project Architecture
