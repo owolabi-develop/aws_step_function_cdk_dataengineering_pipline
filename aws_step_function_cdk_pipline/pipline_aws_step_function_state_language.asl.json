@@ -1,0 +1,7 @@
+{
+    "Comment": "End to End Event Driven Etl Automation pipline cdk",
+    "StartAt": "Pass",
+    "States": {
+       
+    }
+}
