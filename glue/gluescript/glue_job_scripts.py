@@ -13,66 +13,38 @@ job = Job(glueContext)
 job.init(args["JOB_NAME"], args)
 
 
-PropertyDataCatalog = glueContext.create_dynamic_frame.from_catalog(
+CustomerDataCatalog = glueContext.create_dynamic_frame.from_catalog(
     database="customer-database",
     table_name="customer_raw_zone",
-    transformation_ctx="PropertyDataCatalog",
+    transformation_ctx="CustomerDataCatalog",
 )
 
 # Change Schema
-PropertyChangeSchema= ApplyMapping.apply(
-    frame=PropertyDataCatalog,
+CustomerChangeSchema= ApplyMapping.apply(
+    frame=CustomerDataCatalog,
     mappings=[
-        ("property_url", "string", "property_url", "string"),
-        ("mls", "string", "mls", "string"),
-        ("mls_id", "int", "mls_id", "int"),
-        ("status", "string", "status", "string"),
-        ("style.name", "string", "style.name", "string"),
-        ("style.value", "string", "style.value", "string"),
-        ("street", "string", "street", "string"),
-        ("unit", "int", "unit", "int"),
-        ("city", "string", "city", "string"),
-        ("state", "string", "state", "string"),
-        ("zip_code", "string", "zip_code", "string"),
-        ("beds", "int", "beds", "int"),
-        ("full_baths", "int", "full_baths", "int"),
-        ("half_baths", "int", "half_baths", "int"),
-        ("sqft", "int", "sqft", "int"),
-        ("year_built", "int", "year_built", "int"),
-        ("days_on_mls", "int", "days_on_mls", "int"),
-        ("list_price", "int", "list_price", "int"),
-        ("list_date", "string", "list_date", "string"),
-        ("sold_price", "int", "sold_price", "int"),
-        ("last_sold_date", "string", "last_sold_date", "string"),
-        ("lot_sqft", "int", "lot_sqft", "int"),
-        ("price_per_sqft", "int", "price_per_sqft", "int"),
-        ("latitude", "double", "latitude", "double"),
-        ("longitude", "double", "longitude", "double"),
-        ("stories", "int", "stories", "int"),
-        ("hoa_fee", "int", "hoa_fee", "int"),
-        ("parking_garage", "int", "parking_garage", "int"),
-        ("primary_photo", "string", "primary_photo", "string"),
-        ("alt_photos", "string", "alt_photos", "string"),
-        ("partition_0", "string", "partition_0", "string"),
-        ("partition_1", "string", "partition_1", "string"),
-        ("partition_2", "string", "partition_2", "string"),
-        ("partition_3", "string", "partition_3", "string"),
+        ("customer_id", "string", "customer_id", "string"),
+        ("customer_unique_id", "string", "customer_unique_id", "string"),
+        ("customer_zip_code", "int", "customer_zip_code", "int"),
+        ("customer_city", "string", "customer_city", "string"),
+        ("customer_state", "string", "customer_state", "string"),
+        ("partition_0", "string", "partition_0", "string")
     ],
-    transformation_ctx="ChangeSchema_node1711980219070",
+    transformation_ctx="CustomerChangeSchema",
 )
 
 ## write data to s3 consumption bucket and partition by "state", "street", "status"
 
-AmazonS3_node1711980294963 = glueContext.write_dynamic_frame.from_options(
-    frame=PropertyChangeSchema,
+ConsumptionAmazonS3 = glueContext.write_dynamic_frame.from_options(
+    frame=CustomerChangeSchema,
     connection_type="s3",
     format="glueparquet",
     connection_options={
-        "path": "s3://property-consumption-zone",
-        "partitionKeys": ["state", "street", "status"],
+        "path": "s3://consumptions-bucket",
+        "partitionKeys": ["customer_state"],
     },
     format_options={"compression": "snappy"},
-    transformation_ctx="AmazonS3_node1711980294963",
+    transformation_ctx="ConsumptionAmazonS3",
 )
 
 job.commit()
