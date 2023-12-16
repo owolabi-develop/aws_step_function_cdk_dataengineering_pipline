@@ -8,6 +8,10 @@ This solution is develop with AWS Toolkit for Visual Studio Code and and aws cdk
 ## Project Architecture
 ![alt text](diagramphoto/arch.png)
 
+
+## step function workflow
+![alt text](diagramphoto/step_func.jpg)
+
 ```
 $ python -m venv .venv
 ```

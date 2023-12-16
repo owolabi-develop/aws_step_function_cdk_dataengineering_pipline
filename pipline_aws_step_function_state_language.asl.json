@@ -1,128 +1,117 @@
 {
-    "Comment": "End to End Event Driven Etl Automation pipline cdk",
-    "StartAt": "Start Glue Crawler",
-    "States": {
-        "Start Glue Crawler":{
-            "Type": "Task",
-            "Parameters":{
-                "Name":"customer_crawler"
-            },
-            "Resource":"arn:aws:states:::aws-sdk:glue:startCrawler",
-            "Next": "Get crawler status"
+  "Comment": "End to End Event Driven Etl Automation pipline cdk",
+  "StartAt": "Start Glue Crawler",
+  "States": {
+    "Start Glue Crawler": {
+      "Type": "Task",
+      "Parameters": {
+        "Name": "customer_crawler"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:glue:startCrawler",
+      "Next": "Get crawler status"
+    },
+    "Get crawler status": {
+      "Type": "Task",
+      "Parameters": {
+        "Name": "customer_crawler"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:glue:startCrawler",
+      "Next": "Check crawler Status"
+    },
+    "Check crawler Status": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.Crawler.State",
+          "StringEquals": "RUNNING",
+          "Next": "Wait for crawler Status"
         },
-
-        "Get crawler status":{
-            "Type": "Task",
-            "Parameters": {
-                "Name":"customer_crawler"
-            },
-            "Resource": "arn:aws:states:::aws-sdk:glue:startCrawler",
-            "Next": "Check crawler Status"
+        {
+          "Variable": "$.Crawler.State",
+          "StringEquals": "READY",
+          "Next": "Glue Start JobRun"
         },
-
-        "Check crawler Status": {
-            "Type": "Choice",
-            "Choices": [
-                {
-                    "Variable": "$.Crawler.State",
-                    "StringEquals": "RUNNING",
-                    "Next": "Wait for crawler Status"
-                  },
-
-                  {
-                    "Variable": "$.Crawler.State",
-                    "StringEquals": "READY",
-                    "Next": "Glue Start JobRun"
-                  },
-
-                  {
-                    "Variable": "$.Crawler.State",
-                    "StringEquals": "READY",
-                    "Next": "Start an Athena query"
-                  }
-
-            ]
-           
+        {
+          "Variable": "$.Crawler.State",
+          "StringEquals": "READY",
+          "Next": "Start an Athena query"
+        }
+      ]
+    },
+    "Wait for crawler Status": {
+      "Type": "Wait",
+      "Seconds": 30,
+      "Next": "Get crawler status"
+    },
+    "Glue Start JobRun": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "customer_data_job"
+      },
+      "Next": "GetJob"
+    },
+    "GetJob": {
+      "Type": "Task",
+      "Next": "Check Glue JobRun state Status",
+      "Parameters": {
+        "JobName": "MyData"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:glue:getJob"
+    },
+    "Check Glue JobRun state Status": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.JobRun.JobRunState",
+          "StringEquals": "SUCCEEDED",
+          "Next": "Send glue state status results to admin"
         },
-
-        "Wait for crawler Status": {
-            "Type": "Wait",
-            "Seconds": 30,
-           "Next": "Get crawler status"
-
-        },
-        "Glue Start JobRun": {
-            "Type": "Task",
-            "Resource": "arn:aws:states:::glue:startJobRun.sync",
-            "Parameters": {
-              "JobName": "customer_data_job"
-            },
-            "Next": "Get Glue JobRun Status"
-          },
-          "Get Glue JobRun Status": {
-            "Type": "Task",
-            "Resource": "arn:aws:states:::glue:GetJobRun",
-            "Parameters": {
-              "JobName": "customer_data_job"
-            },
-            "Next": "Check Glue JobRun state Status"
-          },
-
-          "Check Glue JobRun state Status": {
-            "Type": "Choice",
-            "Choices": [
-                {
-                    "Variable": "$.JobRun.JobRunState",
-                    "StringEquals": "SUCCEEDED",
-                    "Next": "Send glue state status results to admin"
-                },
-                {
-                    "Variable": "$.JobRun.JobRunState",
-                    "StringEquals": "FAILED",
-                    "Next": "Send glue state status results to admin"
-                }
-            ]
-          
-          },
-          "Send glue state status results to admin": {
-            "Resource": "arn:aws:states:::sns:publish",
-            "Parameters": {
-              "TopicArn": "",
-              "Message": {
-                "Input.$": "$.JobRun.JobRunState"
-              }
-            },
-            "Type": "Task",
-            "End": true
-          },
-          "Start an Athena query": {
-            "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
-            "Parameters": {
-                "QueryString": "select * from customers",
-                "WorkGroup": ""
-            },
-            "Type": "Task",
-            "Next": "Get query results"
-          },
-          "Get query results": {
-            "Resource": "arn:aws:states:::athena:getQueryResults",
-            "Parameters": {
-              "QueryExecutionId.$": "$.QueryExecution.QueryExecutionId"
-            },
-            "Type": "Task",
-            "Next": "Send query results to admin"
-          },
-          "Send query results to admin": {
-            "Resource": "arn:aws:states:::sns:publish",
-            "Parameters": {
-              "TopicArn": "",
-              "Message": {
-                "Input.$": "$.ResultSet.Rows"
-              }
-            },
-            "Type": "Task",
-            "End": true
-          }
-       
+        {
+          "Variable": "$.JobRun.JobRunState",
+          "StringEquals": "FAILED",
+          "Next": "Send glue state status results to admin"
+        }
+      ]
+    },
+    "Send glue state status results to admin": {
+      "Resource": "arn:aws:states:::sns:publish",
+      "Parameters": {
+        "TopicArn": "",
+        "Message": {
+          "Input.$": "$.JobRun.JobRunState"
+        }
+      },
+      "Type": "Task",
+      "End": true
+    },
+    "Start an Athena query": {
+      "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+      "Parameters": {
+        "QueryString": "select * from customers",
+        "WorkGroup": ""
+      },
+      "Type": "Task",
+      "Next": "Get query results"
+    },
+    "Get query results": {
+      "Resource": "arn:aws:states:::athena:getQueryResults",
+      "Parameters": {
+        "QueryExecutionId.$": "$.QueryExecution.QueryExecutionId"
+      },
+      "Type": "Task",
+      "Next": "Send query results to admin"
+    },
+    "Send query results to admin": {
+      "Resource": "arn:aws:states:::sns:publish",
+      "Parameters": {
+        "TopicArn": "",
+        "Message": {
+          "Input.$": "$.ResultSet.Rows"
+        }
+      },
+      "Type": "Task",
+      "End": true
     }
+  }
 }
