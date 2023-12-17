@@ -15,7 +15,7 @@
       "Parameters": {
         "Name": "customer_crawler"
       },
-      "Resource": "arn:aws:states:::aws-sdk:glue:startCrawler",
+      "Resource": "arn:aws:states:::aws-sdk:glue:glue:getCrawler",
       "Next": "Check crawler Status"
     },
     "Check crawler Status": {
@@ -55,7 +55,7 @@
       "Type": "Task",
       "Next": "Check Glue JobRun state Status",
       "Parameters": {
-        "JobName": "MyData"
+        "JobName": "customer_data_job"
       },
       "Resource": "arn:aws:states:::aws-sdk:glue:getJob"
     },

@@ -78,7 +78,7 @@ class GlueCrawlerStack(Stack):
         _glue.CfnCrawler(self, 'glue_crawler',
                  name='customer_crawler',
                  role=glue_role.role_arn,
-                 database_name='property-database',
+                 database_name='customer-database',
                  targets=_glue.CfnCrawler.TargetsProperty(
                      s3_targets=[_glue.CfnCrawler.S3TargetProperty(
                          path=f's3://{raw_landing_bucket}/')]))
