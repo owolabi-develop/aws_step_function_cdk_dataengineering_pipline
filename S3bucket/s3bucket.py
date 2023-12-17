@@ -19,6 +19,13 @@ class S3bucketStacks(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
        
+       
+        ## raw  raw_landing_bucket 
+        raw_landing_bucket = _s3.Bucket(self,"rawlandingbucket",
+                                        bucket_name='raw-landing-bucket',
+                                         removal_policy=RemovalPolicy.DESTROY,
+                                        auto_delete_objects=True,
+                                        encryption=_s3.BucketEncryption.KMS)
     
         raw_staging_bucket = _s3.Bucket(self,"rawstagingbucket",
                                         bucket_name='staging-bucket',
@@ -32,5 +39,8 @@ class S3bucketStacks(Stack):
                                         bucket_name='consumptions-bucket',
                                          removal_policy=RemovalPolicy.DESTROY,
                                         auto_delete_objects=True,
-                                        encryption=_s3.BucketEncryption.KMS)    
+                                        encryption=_s3.BucketEncryption.KMS)  
+        
+        
+
 
