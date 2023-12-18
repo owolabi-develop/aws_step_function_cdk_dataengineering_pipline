@@ -6,11 +6,6 @@ from aws_cdk import (
     aws_glue as _glue,
     aws_lakeformation as _lakeformation,
     Stack,
-    aws_sqs as _sqs,
-    aws_s3_notifications as s3n,
-     aws_sqs as _sqs ,
-    aws_events as _events,
-    aws_s3_notifications as s3n,
     RemovalPolicy,
     aws_s3 as _s3,
 )
@@ -24,17 +19,12 @@ class GlueCrawlerStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs):
         super().__init__(scope, construct_id, **kwargs)
            
-       
-        ## raw  raw_landing_bucket 
-        raw_landing_bucket = _s3.Bucket.from_bucket_attributes(self,
-                                                               "rawlandingbucket1",
-                                                               bucket_arn="arn:aws:s3:::raw-landing-bucket")
            
              
         ## glue script bucket
         glue_script_bucket = _s3.Bucket(self,
                                              "gluescriptbucket",
-                                            bucket_name='customer-glue-script-bucket',
+                                            bucket_name='glue-script-customer-bucket',
                                             removal_policy=RemovalPolicy.DESTROY,
                                             auto_delete_objects=True
                               )
@@ -42,7 +32,7 @@ class GlueCrawlerStack(Stack):
         ### deploy the glue script 
         
         s3deploy.BucketDeployment(self,"deployment",
-                                  sources=[s3deploy.Source.asset('glue/gluescripts')],
+                                  sources=[s3deploy.Source.asset('glue/gluescript')],
                                   destination_bucket=glue_script_bucket)
         
         
@@ -81,12 +71,14 @@ class GlueCrawlerStack(Stack):
                  database_name='customer-database',
                  targets=_glue.CfnCrawler.TargetsProperty(
                      s3_targets=[_glue.CfnCrawler.S3TargetProperty(
-                         path=f's3://{raw_landing_bucket}/')]))
+                         path=f's3://customer-raw-landing-bucket')]))
+        
+        
 
         glue_job = _glue.CfnJob(self, 'glue_job',
                                 name='customer_data_job',
                                 command=_glue.CfnJob.JobCommandProperty(
-                                    name='pythonshell',
+                                    name='Spark',
                                     python_version='3.9',
                                     script_location=f's3://{glue_script_bucket.bucket_name}/glue_job_scripts.py'),
                                 role=glue_role.role_arn,
@@ -97,7 +89,7 @@ class GlueCrawlerStack(Stack):
         
         glue_workflow = _glue.CfnWorkflow(self, 'glue_workflow',
                                   name='glue_workflow',
-                                  description='Workflow to process the coffee data.')
+                                  description='Workflow to process the customer data.')
 
         
         

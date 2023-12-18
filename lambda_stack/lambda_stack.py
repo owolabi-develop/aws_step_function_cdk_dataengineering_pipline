@@ -7,15 +7,15 @@ from aws_cdk import (
     aws_s3 as _s3,
     aws_lambda as _lambda,
     Duration,
-    aws_lambda_event_sources
+    aws_lambda_event_sources,
+    RemovalPolicy
 )
 
 
 
 
 ENVIRONMENT = {
-    'STATE_MECHINE_ARN':"",
-    "EXC_NAME":"customer_data_automation"
+    'STATE_MECHINE_ARN':"arn:aws:states:us-east-1:851725420683:stateMachine:Customer_data",
 }
 
 class LambdaTriggerStack(Stack):
@@ -44,10 +44,13 @@ class LambdaTriggerStack(Stack):
             environment=ENVIRONMENT
         )
         
-        ## raw  raw_landing_bucket 
-        raw_landing_bucket = _s3.Bucket.from_bucket_attributes(self,
-                                                               "rawlandingbucket-2",
-                                                               bucket_arn="arn:aws:s3:::raw-landing-bucket")
+      
+       ## raw  raw_landing_bucket 
+        raw_landing_bucket = _s3.Bucket(self,"rawlandingbucket",
+                                        bucket_name='customer-raw-landing-bucket',
+                                         removal_policy=RemovalPolicy.DESTROY,
+                                        auto_delete_objects=True,
+                                        encryption=_s3.BucketEncryption.KMS)
         
         
         ### s3 bucket trigger   lambda_step_func_trigger

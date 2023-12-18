@@ -15,7 +15,7 @@
       "Parameters": {
         "Name": "customer_crawler"
       },
-      "Resource": "arn:aws:states:::aws-sdk:glue:glue:getCrawler",
+      "Resource": "arn:aws:states:::aws-sdk:glue:getCrawler",
       "Next": "Check crawler Status"
     },
     "Check crawler Status": {
@@ -36,7 +36,8 @@
           "StringEquals": "READY",
           "Next": "Start an Athena query"
         }
-      ]
+      ],
+      "Default": "Wait for crawler Status"
     },
     "Wait for crawler Status": {
       "Type": "Wait",
@@ -77,7 +78,7 @@
     "Send glue state status results to admin": {
       "Resource": "arn:aws:states:::sns:publish",
       "Parameters": {
-        "TopicArn": "",
+        "TopicArn": "arn:aws:sns:us-east-1:851725420683:job-completed",
         "Message": {
           "Input.$": "$.JobRun.JobRunState"
         }
@@ -105,7 +106,7 @@
     "Send query results to admin": {
       "Resource": "arn:aws:states:::sns:publish",
       "Parameters": {
-        "TopicArn": "",
+        "TopicArn": "arn:aws:sns:us-east-1:851725420683:job-completed",
         "Message": {
           "Input.$": "$.ResultSet.Rows"
         }

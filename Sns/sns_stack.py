@@ -14,7 +14,7 @@ class SnsStack(Stack):
         send_email = _sns.Topic(self,"sendEmail",topic_name='job-completed')
         
         ## subscribe to the topic to recieve message
-        send_email.add_subscription(subscription.EmailSubscription('owolabidevelop@gmail.com'))
+        send_email.add_subscription(subscription.EmailSubscription('owolabidevelop84@gmail.com'))
         
       
         

@@ -3,26 +3,27 @@ import os
 
 import aws_cdk as cdk
 
-from aws_step_function_cdk_pipline.aws_step_function_cdk_pipline_stack import AwsStepFunctionCdkPiplineStack
 
+from glue.glue_stack import GlueCrawlerStack
+from lambda_stack.lambda_stack import LambdaTriggerStack
+from S3Bucket.s3bucket import S3bucketStacks
+from step_function_stack.step_func_stack import Etl_StateMechineStack
+from Sns.sns_stack import SnsStack
 
+env_US = cdk.Environment(account="851725420683",region='us-east-1')
 app = cdk.App()
-AwsStepFunctionCdkPiplineStack(app, "AwsStepFunctionCdkPiplineStack",
-    # If you don't specify 'env', this stack will be environment-agnostic.
-    # Account/Region-dependent features and context lookups will not work,
-    # but a single synthesized template can be deployed anywhere.
+GlueCrawlerStack(app,"GlueCrawlerStack",env=env_US)
 
-    # Uncomment the next line to specialize this stack for the AWS Account
-    # and Region that are implied by the current CLI configuration.
+LambdaTriggerStack(app,"LambdaTriggerStack",env=env_US)
 
-    #env=cdk.Environment(account=os.getenv('CDK_DEFAULT_ACCOUNT'), region=os.getenv('CDK_DEFAULT_REGION')),
+S3bucketStacks(app,"S3bucketStacks")
 
-    # Uncomment the next line if you know exactly what Account and Region you
-    # want to deploy the stack to. */
+Etl_StateMechineStack(app,"EtlStateMechineStack",env=env_US)
 
-    #env=cdk.Environment(account='123456789012', region='us-east-1'),
+SnsStack(app,"SnsStack",env=env_US)
 
-    # For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html
-    )
+cdk.Tags.of(app).add("ProjectOwner","Owolabi akintan")
+cdk.Tags.of(app).add("ProjectName","event driven elt pipline")
+
 
 app.synth()

@@ -15,7 +15,7 @@ job.init(args["JOB_NAME"], args)
 
 CustomerDataCatalog = glueContext.create_dynamic_frame.from_catalog(
     database="customer-database",
-    table_name="customer_raw_zone",
+    table_name="olist_customers_dataset_csv",
     transformation_ctx="CustomerDataCatalog",
 )
 
@@ -40,7 +40,7 @@ ConsumptionAmazonS3 = glueContext.write_dynamic_frame.from_options(
     connection_type="s3",
     format="glueparquet",
     connection_options={
-        "path": "s3://consumptions-bucket",
+        "path": "s3://consumptions-customer-bucket",
         "partitionKeys": ["customer_state"],
     },
     format_options={"compression": "snappy"},
